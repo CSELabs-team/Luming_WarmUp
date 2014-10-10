@@ -1,0 +1,8 @@
+<!-- Add a table row every time -->
+{% load staticfiles %}
+<tr>
+	<td> id:{{ item_id }} </td>
+	<td> Todo Item: {{ new_item }} </td>
+	<td> <button class="edit_button" id="{{ item_id }}"> Edit </button> </td>
+	<td> <button class="delete_button" id="{{ item_id }}"> Delete </button> </td>
+</tr>

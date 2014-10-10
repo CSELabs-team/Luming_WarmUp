@@ -1,0 +1,132 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<title> Todo List </title>
+
+	<script type='text/javascript' src='http://code.jquery.com/jquery-1.8.2.js'></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fbposter.css' %}" />
+</head>
+	<body>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#add_button").click(function(){
+                var new_todo_item = $('#new_input_item').val();
+
+                $.ajax({
+                    type:"POST",
+                    url:"http://127.0.0.1:8000/todolist/add",
+                    data: { new_item: new_todo_item,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                            }
+                }).success(function(response){
+                    $('#result_table').append(response);
+                }).done(function(){
+                        //$('#result')[0].innerHTML = 'Newly Added:' + new_todo_item;
+                });
+            });
+
+            $(".delete_button").live('click', function(){
+                var id = this.id;
+                $(this).closest('tr').remove();
+                $.ajax({
+                    type: "POST",
+                    url:"http://127.0.0.1:8000/todolist/delete",
+                    data: { item_id : id,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                            }                            
+                 }).success(function(){
+
+                });
+                return false;
+            });
+
+            $(".edit_button").live('click', function(){
+                var button_id = this.id;
+                var table_row = $(this).parent().parent();
+                var tdTodoItem = table_row.children("td:nth-child(2)");
+                var tdEditButton = table_row.children("td:nth-child(3)");
+                tdTodoItem.html("<input type='text' id='edit_item' value='"+tdTodoItem.html()+"'/>");
+                tdEditButton.html("<button class='save_button' id='"+button_id+"'> Save </button>");
+            });
+
+            $(".save_button").live('click', function(){
+                var button_id = this.id;
+                var table_row = $(this).parent().parent();
+                var tdTodoItem = table_row.children("td:nth-child(2)");
+                var tdSaveButton = table_row.children("td:nth-child(3)");
+
+                update_info_val = tdTodoItem.children().val();
+                tdTodoItem.html(tdTodoItem.children().val());
+                tdSaveButton.html("<button class='edit_button' id='"+button_id+"'> Edit </button>");
+
+                $.ajax({
+                    type: "POST",
+                    url:"http://127.0.0.1:8000/todolist/edit",
+                    data: { item_id : button_id,
+                            update_info : update_info_val,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                            }                            
+                 }).success(function(){
+
+                });
+            });
+        });
+    </script>		
+        <div class="text-center">
+            <font size=10>{{ user.get_full_name|default:user.username }}'s Todo List</font><br/>
+        </div>
+       
+    <div class="container" style="text-align:center;">
+        <div class="col-sm-6" >
+            <div class="container-fluid well span6">
+                <div class="row-fluid">
+                    <div class="span2" >
+                        <img src="" class="img-circle">
+                    </div>
+                    
+                    <div class="span8">
+                        <h3>User Name: {{ user.get_full_name|default:user.username }}</h3>
+                        <h3>Email: {{ user.email }}</h3>
+                    </div>
+
+                    <div class="span8">
+                        <center><font size="6">Todo List</font></center>
+                    </div>
+            </div>
+
+            <div class="jumbotron vertical-center">
+                <ul class="list-group">
+                    {% for value in init_todo_items %}
+
+                      <li class="list-group-item">
+                        <td> {{ value }} </td>
+                      </li>
+                    {% endfor %}
+                </ul>
+
+                <table id="result_table" class="jumbotron vertical-center">
+                </table>
+            </div>
+    		
+            <form id="input_item_form" method="post" name="todoitems">
+    			{% csrf_token %}
+    			<div id="input_item">
+    			Input Todo Items:
+    				<input id="new_input_item" type="text" name="todo_items">
+    				<input id="add_button" type="button" value="Add"><br>
+    			</div>
+    		</form>
+        </div>
+
+        <div style="text-align:center;">
+            <a class="btn btn-large btn-info" href="{% url 'auth:logout' %}?next={{ request.path }}">Logout</a>
+        </div>
+
+    </div>
+
+	</body>
+</html>

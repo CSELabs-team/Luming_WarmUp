@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block main %}
+ <div>
+    <div class="jumbotron vertical-center">
+      <h1 class="text-center">Login to the Todo List</h1>
+    </div>
+
+ <p>
+   <ul>
+   {% if user and not user.is_anonymous %}
+    <meta http-equiv="REFRESH" content="0;url=http://127.0.0.1:8000/todolist">
+     <div>
+        {% for value in todo_items %}
+        <li>{{ value }}</li> 
+        {% endfor %}
+     </div>
+     <li>
+       	<a>
+       		<font size=5>Hello this is the information we need from the OAuth login:</font><br/>
+       		<font size=10>User Name: {{ user.get_full_name|default:user.username }}</font><br/>
+   	   		<font size=10>User Email: {{ user.email }}</font><br/>
+   	   	</a>
+     </li>
+     <li>
+       <font size=4><a href="{% url 'auth:logout' %}?next={{ request.path }}">Logout</a></font>
+     </li>
+
+   {% else %}
+      <div id="browse_app" class="text-center">
+        <a class="btn btn-large btn-info" href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with Google Account</a>
+      </div>
+   {% endif %}
+   </ul>
+ </p>
+ </div>
+{% endblock %}
